@@ -28,18 +28,30 @@ opt.cursorline     = true
 -- General Keymaps
 map("n", "<leader>q", "<cmd>q<cr>", { desc = "Quit" })
 map("n", "<leader>x", "<cmd>bd<CR>", { desc = "Unload buffer" })
-map("n", "<Esc>", "<cmd>nohlsearch<cr>")
+
+-- Search
+map("n", "<Esc>", "<cmd>nohlsearch<cr>", { desc = "Clear search highlights" })
+
+-- Window Navigation
 map("n", "<leader>hw", "<C-w>h", { desc = "Window Left" })
 map("n", "<leader>jw", "<C-w>j", { desc = "Window Down" })
 map("n", "<leader>kw", "<C-w>k", { desc = "Window Up" })
 map("n", "<leader>lw", "<C-w>l", { desc = "Window Right" })
-map("n", "<leader>m", "<cmd>wa<CR><cmd>make<CR><CR><cmd>cw<CR>")
-map("n", "<C-l>", "<cmd>set nu!<CR>")
-map("n", "<leader>dt", "<cmd>diffthis<CR>")
-map("n", "<leader>do", "<cmd>diffoff<CR>")
-map("n", "<leader>bd", "<cmd>set scb!<CR>")
-map("n", "]e", "<cmd>cn<CR>")
-map("n", "[e", "<cmd>cp<CR>")
+
+-- Build/Make
+map("n", "<leader>m", "<cmd>wa<CR><cmd>make<CR><CR><cmd>cw<CR>", { desc = "Save & Make" })
+
+-- UI Toggles
+map("n", "<C-l>", "<cmd>set nu!<CR>", { desc = "Toggle line numbers" })
+
+-- Diffing
+map("n", "<leader>dt", "<cmd>diffthis<CR>", { desc = "Enable diff mode" })
+map("n", "<leader>do", "<cmd>diffoff<CR>", { desc = "Disable diff mode" })
+map("n", "<leader>bd", "<cmd>set scb!<CR>", { desc = "Toggle scroll sync" }) -- scb = scrollbind
+
+-- Quickfix Navigation
+map("n", "]e", "<cmd>cn<CR>", { desc = "Next Quickfix error" })
+map("n", "[e", "<cmd>cp<CR>", { desc = "Prev Quickfix error" })
 
 -- Abbreviations
 vim.cmd.iabbrev("10-", "----------")
