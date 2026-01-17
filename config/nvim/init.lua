@@ -134,25 +134,73 @@ require("lazy").setup({
     end
   },
 
-  -- 3. NerdTree
+  -- 3. File Explorer
   {
-    'preservim/nerdtree',
-    cmd = { "NERDTreeToggle", "NERDTreeFind" },
+    "nvim-tree/nvim-tree.lua",
+    version = "*",
+    lazy = false,
+    -- Removed nvim-web-devicons dependency
     keys = {
-      { '<leader>r', '<cmd>NERDTreeToggle<CR>' },
-      { '<leader>fl', '<cmd>NERDTreeFind<CR>' },
+      { "<leader>r", "<cmd>NvimTreeToggle<CR>", desc = "Toggle NvimTree" },
+      { "<leader>fl", "<cmd>NvimTreeFindFile<CR>", desc = "Find file in NvimTree" },
     },
-    init = function()
-      local g = vim.g
-      g.NERDTreeAutoDeleteBuffer = 1
-      g.NERDTreeMinimalUI = 1
-      g.NERDTreeRespectWildIgnore = 1
-      g.NERDTreeShowBookmarks = 1
-      g.NERDTreeShowHidden = 0
-      g.NERDTreeWinSize = 32
-      g.NERDTreeIgnore = { "__pycache__" }
-      g.NERDTreeCustomOpenArgs = { file = { reuse = 't', where = 'v', keepopen = true }, dir = {} }
-    end,
+    opts = {
+      disable_netrw = true,
+      hijack_netrw = true,
+      view = {
+        width = 32,
+        side = "left",
+      },
+      filters = {
+        dotfiles = true,
+        custom = { "__pycache__" },
+      },
+      git = {
+        enable = true,
+        ignore = false,
+      },
+      -- Force ASCII renderer
+      renderer = {
+        group_empty = true,
+        icons = {
+          web_devicons = {
+             file = { enable = false, color = false },
+             folder = { enable = false, color = false },
+          },
+          show = {
+            git = true,
+            folder = true,
+            file = false,
+            folder_arrow = true,
+          },
+          glyphs = {
+            default = "",
+            symlink = "",
+            bookmark = "#",
+            modified = "*",
+            folder = {
+              arrow_closed = "+",
+              arrow_open = "-",
+              default = "[D]",
+              open = "[O]",
+              empty = "[ ]",
+              empty_open = "[ ]",
+              symlink = "->",
+              symlink_open = "->",
+            },
+            git = {
+              unstaged = "U",
+              staged = "S",
+              unmerged = "M",
+              renamed = "R",
+              untracked = "?",
+              deleted = "D",
+              ignored = "!",
+            },
+          },
+        },
+      },
+    },
   },
 
   -- 4. NerdCommenter
