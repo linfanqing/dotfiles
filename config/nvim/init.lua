@@ -203,11 +203,19 @@ require("lazy").setup({
     },
   },
 
-  -- 4. NerdCommenter
+  -- 4. Treesitter
+  { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
+
+  -- 4.1 Mini.comment
   {
-    'scrooloose/nerdcommenter',
+    'echasnovski/mini.comment',
+    version = '*',
+    config = function()
+      require('mini.comment').setup()
+    end,
     keys = {
-      { '<leader>c', '<plug>NERDCommenterToggle', mode = { 'n', 'v' } },
+      { '<leader>c', 'gcc', mode = 'n', remap = true },
+      { '<leader>c', 'gc', mode = 'v', remap = true },
     },
   },
 
