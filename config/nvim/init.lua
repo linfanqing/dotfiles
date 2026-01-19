@@ -58,6 +58,9 @@ vim.cmd.iabbrev("10-", "----------")
 vim.cmd.iabbrev("80-", "--------------------------------------------------------------------------------")
 vim.cmd.iabbrev("80=", "================================================================================")
 
+-- Command abbreviations
+vim.cmd.cnoreabbrev("tb", "tabnew")
+
 -- Highlight on yank
 local yank_group = api.nvim_create_augroup('YankHighlight', { clear = true })
 api.nvim_create_autocmd('TextYankPost', {
@@ -151,6 +154,13 @@ require("lazy").setup({
         width = 32,
         side = "left",
       },
+      actions = {
+        open_file = {
+          window_picker = {
+            enable = false,
+          },
+        },
+      },
       filters = {
         dotfiles = true,
         custom = { "__pycache__" },
@@ -158,47 +168,6 @@ require("lazy").setup({
       git = {
         enable = true,
         ignore = false,
-      },
-      -- Force ASCII renderer
-      renderer = {
-        group_empty = true,
-        icons = {
-          web_devicons = {
-             file = { enable = false, color = false },
-             folder = { enable = false, color = false },
-          },
-          show = {
-            git = true,
-            folder = true,
-            file = false,
-            folder_arrow = true,
-          },
-          glyphs = {
-            default = "",
-            symlink = "",
-            bookmark = "#",
-            modified = "*",
-            folder = {
-              arrow_closed = "+",
-              arrow_open = "-",
-              default = "[D]",
-              open = "[O]",
-              empty = "[ ]",
-              empty_open = "[ ]",
-              symlink = "->",
-              symlink_open = "->",
-            },
-            git = {
-              unstaged = "U",
-              staged = "S",
-              unmerged = "M",
-              renamed = "R",
-              untracked = "?",
-              deleted = "D",
-              ignored = "!",
-            },
-          },
-        },
       },
     },
   },
@@ -211,7 +180,17 @@ require("lazy").setup({
     'echasnovski/mini.comment',
     version = '*',
     config = function()
-      require('mini.comment').setup()
+      require('mini.comment').setup({
+        options = {
+          custom_commentstring = function()
+            local ft = vim.bo.filetype
+            if ft == 'cpp' or ft == 'c' or ft == 'cuda' then
+              return '// %s'
+            end
+            return nil  -- fallback to default
+          end,
+        },
+      })
     end,
     keys = {
       { '<leader>c', 'gcc', mode = 'n', remap = true },
@@ -332,60 +311,31 @@ require("lazy").setup({
     event = { "BufReadPre", "BufNewFile" },
     config = function()
       local lspconfig = require("lspconfig")
-      local on_attach = function(client, bufnr)
-        local opts = { buffer = bufnr }
-        map("n", "gd", vim.lsp.buf.definition, opts)
-        map("n", "K", vim.lsp.buf.hover, opts)
-        map("n", "<leader>rn", vim.lsp.buf.rename, opts)
-        map("n", "<leader>ca", vim.lsp.buf.code_action, opts)
-        vim.bo[bufnr].omnifunc = "v:lua.vim.lsp.omnifunc"
-      end
-
-      -- Lua
-      if fn.executable("lua-language-server") == 1 then
-        lspconfig.lua_ls.setup({
-          on_attach = on_attach,
-          settings = { Lua = { diagnostics = { globals = { "vim" } } } }
-        })
-      end
+      
+      -- Modern LSP keybindings using LspAttach autocmd
+      api.nvim_create_autocmd("LspAttach", {
+        group = api.nvim_create_augroup("UserLspConfig", { clear = true }),
+        callback = function(ev)
+          local opts = { buffer = ev.buf }
+          map("n", "gd", vim.lsp.buf.definition, opts)
+          map("n", "K", vim.lsp.buf.hover, opts)
+          map("n", "<leader>rn", vim.lsp.buf.rename, opts)
+          map("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+          vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
+        end,
+      })
 
       -- C/C++
       if fn.executable("clangd") == 1 then
-        lspconfig.clangd.setup({ on_attach = on_attach })
+        lspconfig.clangd.setup({})
       end
 
-      -- Python (Custom Detection Logic)
-      api.nvim_create_autocmd("FileType", {
-        pattern = "python",
-        callback = function()
-          if fn.executable("pyright-langserver") == 1 then
-            vim.lsp.start({
-              name = "pyright",
-              cmd = { "pyright-langserver", "--stdio" },
-              root_dir = vim.fs.dirname(vim.fs.find({ '.git', 'pyproject.toml' }, { upward = true })[1]),
-              on_attach = on_attach,
-            })
-          end
-        end,
-      })
-
-      -- TS/JS (Custom Detection Logic)
-      api.nvim_create_autocmd("FileType", {
-        pattern = { "javascript", "typescript", "javascriptreact", "typescriptreact" },
-        callback = function()
-          if fn.executable("typescript-language-server") == 1 then
-            vim.lsp.start({
-              name = "ts_ls",
-              cmd = { "typescript-language-server", "--stdio" },
-              root_dir = vim.fs.dirname(vim.fs.find({ '.git', 'package.json' }, { upward = true })[1]),
-              on_attach = on_attach,
-            })
-          end
-        end,
-      })
+      -- Python
+      if fn.executable("pyright-langserver") == 1 then
+        lspconfig.pyright.setup({})
+      end
     end
   }
-
 }, {})
 
 -- ==========================================================================
